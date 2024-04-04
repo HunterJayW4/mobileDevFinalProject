@@ -1,0 +1,22 @@
+import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import HomeScreen from './HomeScreen'; // Adjust the path as necessary
+import Register from './Register'; // Make sure the path to Register.js is correct
+import LoginScreen from './LoginScreen'; // If App is a screen you intend to navigate to, ensure it doesn't recursively include the Navigator
+
+const Stack = createNativeStackNavigator();
+
+function AppNavigator() {
+    return (
+        <NavigationContainer>
+            <Stack.Navigator>
+                <Stack.Screen name="Login" component={LoginScreen} />
+                <Stack.Screen name="Home" component={HomeScreen} />
+                <Stack.Screen name="Register" component={Register} />
+            </Stack.Navigator>
+        </NavigationContainer>
+    );
+}
+
+export default AppNavigator;
