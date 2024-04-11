@@ -1,4 +1,3 @@
-// LoginScreen.js
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -12,7 +11,7 @@ export default function LoginScreen() {
 
     const handleLogin = () => {
         if (username === 'admin' && password === 'password') {
-            navigation.navigate('Home');
+            navigation.navigate('Home', { username: username});
             console.log("Login Successful");
         } else {
             alert('Invalid username or password!');
