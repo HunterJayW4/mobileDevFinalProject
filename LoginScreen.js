@@ -9,14 +9,33 @@ export default function LoginScreen() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const navigation = useNavigation(); // Use the useNavigation hook to get navigation
 
-    const handleLogin = () => {
-        if (username === 'admin' && password === 'password') {
-            navigation.navigate('Home', { username: username});
-            console.log("Login Successful");
-        } else {
-            alert('Invalid username or password!');
+    const handleLogin = async () => {
+        try {
+            const response = await fetch('http://10.0.0.40:2000/login', { // Replace with your server's IP and port
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    username: username,
+                    password: password,
+                }),
+            });
+
+            const data = await response.json();
+            if (response.status === 200) {
+                setIsLoggedIn(true);
+                navigation.navigate('Home', { username: username });
+                console.log("Login Successful");
+            } else {
+                alert(data.error || 'Invalid username or password!');
+            }
+        } catch (error) {
+            console.error('Login request error:', error);
+            alert('Failed to connect to the server.');
         }
     };
+
 
     const handleRegister = () => {
         navigation.navigate('Register');
