@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import HomeScreen from "./HomeScreen";
 
 export default function LoginScreen() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
     const navigation = useNavigation(); // Use the useNavigation hook to get navigation
 
     const handleLogin = async () => {
@@ -24,7 +22,6 @@ export default function LoginScreen() {
 
             const data = await response.json();
             if (response.status === 200) {
-                setIsLoggedIn(true);
                 navigation.navigate('Home', { username: username });
                 console.log("Login Successful");
             } else {
@@ -36,7 +33,6 @@ export default function LoginScreen() {
         }
     };
 
-
     const handleRegister = () => {
         navigation.navigate('Register');
     };
@@ -44,40 +40,33 @@ export default function LoginScreen() {
     // Render method with TextInput for username and password, and TouchableOpacities for login and register
     return (
         <View style={styles.container}>
-            {!isLoggedIn ? (
-                <>
-                    <Text style={styles.title}>Welcome to GroceryHound</Text>
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Username"
-                        onChangeText={text => setUsername(text)}
-                        value={username}
-                    />
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Password"
-                        onChangeText={text => setPassword(text)}
-                        value={password}
-                        secureTextEntry={true}
-                    />
-                    <View style={styles.buttonContainer}>
-                        <TouchableOpacity style={[styles.button, styles.buttonLeft]} onPress={handleLogin}>
-                            <Text style={styles.buttonText}>Login</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={[styles.button, styles.buttonRight]} onPress={handleRegister}>
-                            <Text style={styles.buttonText}>Register</Text>
-                        </TouchableOpacity>
-                    </View>
-                </>
-            ) : (
-                <HomeScreen username={username} />
-            )}
+            <Text style={styles.title}>Welcome to GroceryHound</Text>
+            <TextInput
+                style={styles.input}
+                placeholder="Username"
+                onChangeText={setUsername}
+                value={username}
+            />
+            <TextInput
+                style={styles.input}
+                placeholder="Password"
+                onChangeText={setPassword}
+                value={password}
+                secureTextEntry={true}
+            />
+            <View style={styles.buttonContainer}>
+                <TouchableOpacity style={[styles.button, styles.buttonLeft]} onPress={handleLogin}>
+                    <Text style={styles.buttonText}>Login</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={[styles.button, styles.buttonRight]} onPress={handleRegister}>
+                    <Text style={styles.buttonText}>Register</Text>
+                </TouchableOpacity>
+            </View>
         </View>
     );
 }
 
 // Styles for your LoginScreen component...
-// Styles remain unchanged
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -93,8 +82,8 @@ const styles = StyleSheet.create({
     },
     buttonContainer: {
         flexDirection: 'row',
-        justifyContent: 'space-around', // This will distribute space evenly around the buttons.
-        width: '80%', // Adjust the width as necessary to fit your layout.
+        justifyContent: 'space-around',
+        width: '80%',
     },
     input: {
         width: '80%',
@@ -108,14 +97,13 @@ const styles = StyleSheet.create({
         backgroundColor: 'blue',
         padding: 10,
         borderRadius: 5,
-        marginVertical: 10, // Keep vertical margin, remove horizontal margin
+        marginVertical: 10,
     },
-    // New styles for left and right buttons:
     buttonLeft: {
-        marginRight: 1, // Add some spacing to the right of the left button
+        marginRight: 1,
     },
     buttonRight: {
-        marginLeft: 1, // Add some spacing to the left of the right button
+        marginLeft: 1,
     },
     buttonText: {
         color: 'white',
