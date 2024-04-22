@@ -5,11 +5,12 @@ import { useNavigation } from '@react-navigation/native';
 export default function LoginScreen() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const navigation = useNavigation(); // Use the useNavigation hook to get navigation
+    const navigation = useNavigation();
 
     const handleLogin = async () => {
+        console.log('Login attempt started'); // Log the start of a login attempt
         try {
-            const response = await fetch('http://10.0.0.40:2000/login', { // Replace with your server's IP and port
+            const response = await fetch('http://192.168.240.101:2000/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -23,21 +24,22 @@ export default function LoginScreen() {
             const data = await response.json();
             if (response.status === 200) {
                 navigation.navigate('Home', { username: username });
-                console.log("Login Successful");
+                console.log(`Login successful for username: ${username}`); // Log successful login
             } else {
+                console.warn(`Login failed for username: ${username}, status: ${response.status}`); // Log failed login attempt
                 alert(data.error || 'Invalid username or password!');
             }
         } catch (error) {
-            console.error('Login request error:', error);
+            console.error('Login request error:', error); // Log exceptions
             alert('Failed to connect to the server.');
         }
     };
 
     const handleRegister = () => {
+        console.log('Navigating to Register screen'); // Log navigation event
         navigation.navigate('Register');
     };
 
-    // Render method with TextInput for username and password, and TouchableOpacities for login and register
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Welcome to GroceryHound</Text>
@@ -65,6 +67,7 @@ export default function LoginScreen() {
         </View>
     );
 }
+
 
 // Styles for your LoginScreen component...
 const styles = StyleSheet.create({
