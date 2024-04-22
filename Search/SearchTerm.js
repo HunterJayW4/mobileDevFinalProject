@@ -19,16 +19,16 @@ async function getKrogerApiKey() {
   }
 }
 
-// Function to fetch Kroger stores by latitude and longitude
-async function SearchItems(locationId, productId) {
+async function SearchTerm(locationId, term) {
     // Get the Kroger API key
     const KROGER_API_KEY = await getKrogerApiKey();
     console.log(KROGER_API_KEY);
     
     // Construct URL with the Kroger API key
     const url = new URL(KROGER_API_URL);
+    url.searchParams.append('filter.term', term);
+    console.log(url);
     url.searchParams.append('filter.locationId', locationId);
-    url.searchParams.append('filter.productId', "0" + productId.slice(0, -1));
         console.log(url);
 
     const settings = {
@@ -50,5 +50,4 @@ async function SearchItems(locationId, productId) {
     }
   }
 
-// This function can be imported into other JavaScript files for Kroger store searches by latitude and longitude
-export default SearchItems;
+  export default SearchTerm;

@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, FlatList, Button, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, FlatList, Button, TouchableOpacity, TextInput } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 const HomeScreen = ({ route }) => {
     const { username } = route.params;
     const [items, setItems] = useState([]); // Initialize an empty array for items
     const navigation = useNavigation(); // Get the navigation object
+    const [searchQuery, setSearchQuery] = useState('');
 
     // Function to handle adding new items
     const handleAddItem = (newItem) => {
@@ -28,6 +29,12 @@ const HomeScreen = ({ route }) => {
         handleAddItem(data);
     };
 
+    // Function to handle search
+    const handleSearch = () => {
+        navigation.navigate('Search', { searchQuery: searchQuery });
+    };
+
+
     return (
         <View style={styles.container}>
             <Text style={styles.title}>{username}'s List</Text>
@@ -47,6 +54,13 @@ const HomeScreen = ({ route }) => {
                 <Button title="Add Test Item" onPress={addTestItem} />
                 <Button title="Scan Barcode" onPress={() => navigation.navigate('Camera', { onBarcodeScanned: handleBarcodeScanned })} />
             </View>
+            <TextInput
+                style={styles.searchInput}
+                placeholder="Search items..."
+                onChangeText={(text) => setSearchQuery(text)}
+                value={searchQuery}
+            />
+            <Button title="Search" onPress={handleSearch} />
         </View>
     );
 };
@@ -77,7 +91,15 @@ const styles = StyleSheet.create({
     },
     buttonContainer: {
         position: 'absolute',
-        bottom: 50,
+        bottom: 100,
+    },
+    searchInput: {
+        width: '80%',
+        borderWidth: 1,
+        borderColor: 'black',
+        borderRadius: 5,
+        padding: 10,
+        marginBottom: 10,
     },
 });
 
