@@ -103,10 +103,16 @@ const CameraScreen = () => {
                         <View style={styles.textContainer}>
                             <Text style={styles.descriptionText}>{itemData?.data[0]?.description ?? 'N/A'}</Text>
                             <Text style={styles.brandText}>Brand: {itemData?.data[0]?.brand ?? 'N/A'}</Text>
-                            <Text style={styles.priceText}>Price: ${itemData?.data[0]?.items[0]?.price?.regular}</Text>
-                            <Text style={styles.locationText}>In Stock At: {locationData?.data?.[0]?.name ?? 'N/A'}</Text>
-                            <Text style={styles.addressText}>Address: {locationData?.data?.[0]?.address?.addressLine1 ?? 'N/A'}</Text>
-                            <Text style={styles.aisleText}>Aisle: {itemData?.data[0].aisleLocations?.[0]?.number ?? 'N/A'}</Text>
+                            {itemData?.data[0]?.items[0]?.fulfillment?.inStore ? (
+                                <>
+                                    <Text style={styles.priceText}>Price: ${itemData?.data[0]?.items[0]?.price?.regular}</Text>
+                                    <Text style={styles.locationText}>In Stock At: {locationData?.data?.[0]?.name ?? 'N/A'}</Text>
+                                    <Text style={styles.addressText}>Address: {locationData?.data?.[0]?.address?.addressLine1 ?? 'N/A'}</Text>
+                                    <Text style={styles.aisleText}>Aisle: {itemData?.data[0].aisleLocations?.[0]?.number ?? 'N/A'}</Text>
+                                </>
+                            ) : (
+                                <Text style={styles.outOfStockText}>Out of Stock!</Text>
+                            )}
                         </View>
                     </View>
                     <TouchableOpacity onPress={closePopup} style={styles.closeButton}>
@@ -199,6 +205,11 @@ const styles = StyleSheet.create({
     },
     closeButtonText: {
         color: 'white',
+    },
+    outOfStockText: {
+        fontWeight: 'bold',
+        color: 'red',
+        marginBottom: 5,
     },
     invalidBarcodeContainer: {
         flex: 1,
