@@ -9,51 +9,18 @@ export default function Register({ navigation }) {
     const [repeatPassword, setRepeatPassword] = useState('');
     const [fullName, setFullName] = useState('');
 
-    const handleSubmit = async () => {
-        console.log("Attempting to submit registration form");
-
+    const handleSubmit = () => {
         if (password !== repeatPassword) {
-            console.log("Validation failed: Passwords do not match");
             Alert.alert('Error', 'Passwords do not match');
             return;
         }
-
-        console.log("Preparing to send request to the server");
-        console.log("Payload:", { email, username, password, fullName }); // Log the data being sent; remove or mask sensitive data like password in a production environment
-
-        try {
-            const response = await fetch('http://10.0.0.40:2000/register', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    email: email,
-                    username: username,
-                    password: password, // Note: Password should be hashed on the server before storing
-                    fullName: fullName,
-                }),
-            });
-
-            console.log("Response received from the server:", response.status);
-
-            if (response.ok) {
-                console.log("Registration successful");
-                Alert.alert('Success', 'Registration Successful');
-                navigation.navigate('Login');
-            } else {
-                console.log("Failed to register, server responded with status:", response.status);
-                const errorResponse = await response.text(); // or response.json() if response is expected to be JSON
-                console.log("Error response body:", errorResponse);
-                throw new Error('Failed to register');
-            }
-        } catch (error) {
-            console.log("Network or server error:", error.message);
-            Alert.alert('Error', error.message);
-        }
+        // Add your registration logic here
+        // For now, we'll just console log the details and navigate back
+        console.log({ email, username, password, fullName });
+        // Assume success and navigate to the login screen
+        // Replace 'LoginScreen' with the actual name you have for the login screen
+        navigation.navigate('LoginScreen');
     };
-
-
 
     return (
         <View style={styles.container}>

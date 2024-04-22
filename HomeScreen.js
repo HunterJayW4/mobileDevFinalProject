@@ -54,31 +54,23 @@ const HomeScreen = ({ route }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f5f5f5', // Background color for the entire screen
+        backgroundColor: 'lightgrey',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: 20, // Adds padding around the outer container
     },
     title: {
         fontSize: 24,
         fontWeight: 'bold',
         marginBottom: 20,
-        color: '#333', // Optionally set text color for better contrast
     },
     listItem: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        backgroundColor: 'white', // Set the background color to white for list items
-        width: '100%', // Ensures full width within the padded container
-        padding: 10, // Padding inside each list item
-        marginVertical: 5, // Adds vertical spacing between items
-        shadowColor: '#000', // Shadow for 3D effect, optional
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.2,
-        shadowRadius: 1.5,
-        elevation: 2, // Elevation for Android (shadow equivalent)
-        borderRadius: 5, // Rounded corners for list items
+        width: '100%',
+        padding: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: '#ccc',
     },
     deleteText: {
         color: 'red',
@@ -86,10 +78,7 @@ const styles = StyleSheet.create({
     buttonContainer: {
         position: 'absolute',
         bottom: 50,
-        width: '100%', // Ensure the buttons span the full width of the screen
-        paddingHorizontal: 20, // Padding on the sides for the buttons, matches the container padding
     },
 });
-
 
 export default HomeScreen;
