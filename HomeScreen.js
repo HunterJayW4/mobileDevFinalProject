@@ -1,31 +1,32 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, FlatList, Button, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, FlatList, Button, TouchableOpacity, TextInput } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 const HomeScreen = ({ route }) => {
     const { username } = route.params;
-    const [items, setItems] = useState([]); // Initialize an empty array for items
-    const navigation = useNavigation(); // Get the navigation object
+    const [items, setItems] = useState([]);
+    const navigation = useNavigation();
+    const [searchQuery, setSearchQuery] = useState('');
 
-    // Function to handle adding new items
     const handleAddItem = (newItem) => {
         setItems((prevItems) => [...prevItems, newItem]);
     };
 
-    // Function to handle deleting items
     const handleDeleteItem = (index) => {
         setItems((prevItems) => prevItems.filter((item, i) => i !== index));
     };
 
-    // Function to add a test item
     const addTestItem = () => {
         const testItem = `Item ${items.length + 1}`;
         handleAddItem(testItem);
     };
 
-    // Function to handle barcode scanning
     const handleBarcodeScanned = (data) => {
         handleAddItem(data);
+    };
+
+    const handleSearch = () => {
+        navigation.navigate('Search', { searchQuery: searchQuery });
     };
 
     return (
@@ -44,8 +45,15 @@ const HomeScreen = ({ route }) => {
                 keyExtractor={(item, index) => index.toString()}
             />
             <View style={styles.buttonContainer}>
-                <Button title="Add Test Item" onPress={addTestItem} />
-                <Button title="Scan Barcode" onPress={() => navigation.navigate('Camera', { onBarcodeScanned: handleBarcodeScanned })} />
+                <Button title="Add Test Item" onPress={addTestItem} style={styles.button} />
+                <Button title="Scan Barcode" onPress={() => navigation.navigate('Camera', { onBarcodeScanned: handleBarcodeScanned })} style={styles.button} />
+                <TextInput
+                    style={styles.searchInput}
+                    placeholder="Search items..."
+                    onChangeText={(text) => setSearchQuery(text)}
+                    value={searchQuery}
+                />
+                <Button title="Search" onPress={handleSearch} style={styles.button} />
             </View>
         </View>
     );
@@ -54,31 +62,31 @@ const HomeScreen = ({ route }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f5f5f5', // Background color for the entire screen
+        backgroundColor: '#f5f5f5',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: 20, // Adds padding around the outer container
+        padding: 20,
     },
     title: {
         fontSize: 24,
         fontWeight: 'bold',
         marginBottom: 20,
-        color: '#333', // Optionally set text color for better contrast
+        color: '#333',
     },
     listItem: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        backgroundColor: 'white', // Set the background color to white for list items
-        width: '100%', // Ensures full width within the padded container
-        padding: 10, // Padding inside each list item
-        marginVertical: 5, // Adds vertical spacing between items
-        shadowColor: '#000', // Shadow for 3D effect, optional
+        backgroundColor: 'white',
+        width: '100%',
+        padding: 10,
+        marginVertical: 5,
+        shadowColor: '#000',
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.2,
         shadowRadius: 1.5,
-        elevation: 2, // Elevation for Android (shadow equivalent)
-        borderRadius: 5, // Rounded corners for list items
+        elevation: 2,
+        borderRadius: 5,
     },
     deleteText: {
         color: 'red',
@@ -86,10 +94,21 @@ const styles = StyleSheet.create({
     buttonContainer: {
         position: 'absolute',
         bottom: 50,
-        width: '100%', // Ensure the buttons span the full width of the screen
-        paddingHorizontal: 20, // Padding on the sides for the buttons, matches the container padding
+        width: '100%',
+        flexDirection: 'row', // Set flexDirection to row to align children horizontally
+        justifyContent: 'space-around', // Distributes space evenly around each button
+        paddingHorizontal: 20,
+    },
+    button: {
+        flex: 1, // Each button will take an equal portion of the container
+    },
+    searchInput: {
+        flex: 1, // Ensure the input also takes an equal portion of the space
+        borderWidth: 1,
+        borderColor: 'gray',
+        paddingHorizontal: 10,
+        marginRight: 10, // Optional margin for spacing
     },
 });
-
 
 export default HomeScreen;

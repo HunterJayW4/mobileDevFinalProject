@@ -22,7 +22,7 @@ export default function Register({ navigation }) {
         console.log("Payload:", { email, username, password, fullName }); // Log the data being sent; remove or mask sensitive data like password in a production environment
 
         try {
-            const response = await fetch('http://10.0.0.40:2000/register', {
+            const response = await fetch('http://192.168.240.101:2000/register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
