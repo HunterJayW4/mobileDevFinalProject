@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, StyleSheet, Image, TouchableOpacity } from 'react-native';
-import SearchTerm from './Search/SearchTerm'; // Import your SearchItems function
+import { View, Text, FlatList, StyleSheet, Image, TouchableOpacity, Button } from 'react-native';
 import { getLocation } from './LocationService';
 import SearchStore from './Search/SearchStores';
+import SearchTerm from './Search/SearchTerm'; // Import your SearchItems function
 
 const SearchScreen = ({ navigation, route }) => {
     const { searchQuery } = route.params;
     const [searchResults, setSearchResults] = useState([]);
+    const [isSearched, setSearch] = useState(false);
 
     useEffect(() => {
         // Perform search when the component mounts or when searchQuery changes
@@ -18,7 +19,7 @@ const SearchScreen = ({ navigation, route }) => {
     const searchItems = async (query) => {
         try {
             const location = await getLocation();
-            if(location){
+            if(location && !isSearched){
                 const storeData = await SearchStore(location.coords.latitude, location.coords.longitude);
                 if (storeData && storeData.data && Array.isArray(storeData.data) && storeData.data.length > 0 && storeData.data[0].locationId) {
                     const locationId = storeData.data[0].locationId;
@@ -52,6 +53,7 @@ const SearchScreen = ({ navigation, route }) => {
                             });
                         }
                         setSearchResults(itemArray);
+                        setSearch(true);
                     }
                 }
             }
@@ -60,18 +62,22 @@ const SearchScreen = ({ navigation, route }) => {
         }
     };
 
+    const addItem = () => {
+
+    }
+
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Search Results</Text>
+            <Text style={styles.title}>Search Results for {searchQuery}</Text>
             <FlatList
                 data={searchResults}
                 renderItem={({ item }) => (
-                    <View style={styles.container}>
+                    <View style={styles.itemContainer}>
                         <Image
                             source={{ uri: item.image }}
                             style={styles.image}
                         />
-                        <View style={styles.textContainer}>
+                        <View style={styles.itemContent}>
                             <Text style={styles.descriptionText}>{item.description}</Text>
                             <Text style={styles.brandText}>Brand: {item.brand}</Text>
                             {item.inStock ? (
@@ -84,6 +90,12 @@ const SearchScreen = ({ navigation, route }) => {
                             ) : (
                                 <Text style={styles.outOfStockText}>Out of Stock!</Text>
                             )}
+                            <TouchableOpacity onPress={addItem} style={styles.addItemButton}>
+                                <Text style={styles.addText}>Add Item</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={addItem} style={styles.addItemButton}>
+                                <Text style={styles.addText}>Find Store</Text>
+                            </TouchableOpacity>
                         </View>
                     </View>
                 )}
@@ -96,22 +108,41 @@ const SearchScreen = ({ navigation, route }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: 'lightgrey',
-        alignItems: 'center',
+        backgroundColor: '#D3D3D3',
         justifyContent: 'center',
+        paddingHorizontal: 20,
+    },
+    addItemButton: {
+        marginTop: 15,
+        padding: 5,
+        backgroundColor: 'blue',
+        borderRadius: 10,
+        width: '50%',
+    },
+    addText: {
+        fontSize: 15,
+        fontWeight: 'bold',
+        paddingVertical: 10,
+        paddingHorizontal: 10,
+        textAlign: 'center',
+        color: 'white',
+        backgroundColor: 'blue',
     },
     title: {
         fontSize: 24,
         fontWeight: 'bold',
-        marginBottom: 20,
+        paddingVertical: 20,
+        textAlign: 'center',
+        marginBottom: 5,
     },
-    modalContent: {
+    itemContainer: {
         flexDirection: 'row',
         alignItems: 'center',
         backgroundColor: 'white',
         borderRadius: 10,
-        padding: 20,
-        marginBottom: 10, // Added margin bottom for better spacing
+        marginBottom: 10,
+        padding: 10,
+        width: '100%',
     },
     image: {
         width: 100,
@@ -119,12 +150,10 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         marginRight: 20,
     },
-    textContainer: {
+    itemContent: {
         flex: 1,
-        maxWidth: '60%',
     },
     descriptionText: {
-        flexWrap: 'wrap',
         marginBottom: 5,
     },
     brandText: {
@@ -151,5 +180,6 @@ const styles = StyleSheet.create({
         marginBottom: 5,
     },
 });
+
 
 export default SearchScreen;

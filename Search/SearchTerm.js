@@ -23,13 +23,14 @@ async function SearchTerm(locationId, term) {
     // Get the Kroger API key
     const KROGER_API_KEY = await getKrogerApiKey();
     console.log(KROGER_API_KEY);
+    const limit = 100;
     
     // Construct URL with the Kroger API key
     const url = new URL(KROGER_API_URL);
     url.searchParams.append('filter.term', term);
-    console.log(url);
     url.searchParams.append('filter.locationId', locationId);
-        console.log(url);
+    url.searchParams.append('filter.limit', 20);
+    console.log(url);
 
     const settings = {
       method: "GET",
