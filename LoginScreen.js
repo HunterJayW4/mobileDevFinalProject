@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 export default function LoginScreen() {
@@ -40,8 +40,14 @@ export default function LoginScreen() {
         navigation.navigate('Register');
     };
 
+    const handleContinueAsGuest = () => {
+        console.log('Continue as Guest clicked', { username: "Guest" });
+        navigation.navigate('Home', { username: "Guest" });
+    };
+
     return (
         <View style={styles.container}>
+            <Image source={require('./assets/groceryhoundlogo.png')} style={styles.logo} />
             <Text style={styles.title}>Welcome to GroceryHound</Text>
             <TextInput
                 style={styles.input}
@@ -63,11 +69,13 @@ export default function LoginScreen() {
                 <TouchableOpacity style={[styles.button, styles.buttonRight]} onPress={handleRegister}>
                     <Text style={styles.buttonText}>Register</Text>
                 </TouchableOpacity>
+                <TouchableOpacity style={[styles.button, styles.continueButton]} onPress={handleContinueAsGuest}>
+                    <Text style={styles.buttonText}>Continue As Guest</Text>
+                </TouchableOpacity>
             </View>
         </View>
     );
 }
-
 
 // Styles for your LoginScreen component...
 const styles = StyleSheet.create({
@@ -108,9 +116,19 @@ const styles = StyleSheet.create({
     buttonRight: {
         marginLeft: 1,
     },
+    continueButton: {
+        backgroundColor: 'green', // Adjust color as needed
+    },
     buttonText: {
         color: 'white',
         fontSize: 16,
         fontWeight: 'bold',
     },
+    logo: {
+        width: 300, 
+        height: 100, 
+        resizeMode: 'contain', 
+        marginBottom: 20,
+    },
+    
 });

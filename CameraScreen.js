@@ -45,7 +45,7 @@ const CameraScreen = () => {
             setProcessingBarcodeResult(true);
             const location = await getLocation();
             if (location) {
-                const storeData = await SearchStore(location.coords.latitude, location.coords.longitude);
+                const storeData = await SearchStore(location.coords.latitude, location.coords.longitude, 20);
                 if (storeData && storeData.data && Array.isArray(storeData.data) && storeData.data.length > 0 && storeData.data[0].locationId) {
                     const locationId = storeData.data[0].locationId;
                     const itemsData = await SearchItems(locationId, data);
