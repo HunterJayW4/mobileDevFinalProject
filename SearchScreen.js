@@ -3,10 +3,15 @@ import { View, Text, FlatList, StyleSheet, Image, TouchableOpacity, Alert } from
 import SearchTerm from './Search/SearchTerm';
 import { getLocation } from './LocationService';
 import SearchStore from './Search/SearchStores';
+import Constants from "expo-constants";
 
 const SearchScreen = ({ navigation, route }) => {
     const { searchQuery, username } = route.params;
     const [searchResults, setSearchResults] = useState([]);
+
+    // Safely get the local IP address
+    const localIp = Constants.expoConfig?.hostUri?.split(':')?.[0] ?? 'localhost';
+    const apiBaseUrl = `http://${localIp}:2000`;
 
     useEffect(() => {
         if (searchQuery) {
@@ -63,7 +68,7 @@ const SearchScreen = ({ navigation, route }) => {
 
     const addItemToList = async (item) => {
         try {
-            const response = await fetch('http://192.168.240.101:2000/addItem', {
+            const response = await fetch(apiBaseUrl + '/addItem', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

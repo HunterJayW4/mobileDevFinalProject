@@ -1,16 +1,21 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import Constants from 'expo-constants';
 
 export default function LoginScreen() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const navigation = useNavigation();
 
+    // Safely get the local IP address
+    const localIp = Constants.expoConfig?.hostUri?.split(':')?.[0] ?? 'localhost';
+    const apiBaseUrl = `http://${localIp}:2000`;
+
     const handleLogin = async () => {
-        console.log('Login attempt started'); // Log the start of a login attempt
+        console.log('Login attempt started');
         try {
-            const response = await fetch('http://192.168.240.101:2000/login', {
+            const response = await fetch(`${apiBaseUrl}/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -22,21 +27,21 @@ export default function LoginScreen() {
             });
 
             const data = await response.json();
-            if (response.status === 200) {
+            if (response.ok) {
                 navigation.navigate('Home', { username: username });
-                console.log(`Login successful for username: ${username}`); // Log successful login
+                console.log(`Login successful for username: ${username}`);
             } else {
-                console.warn(`Login failed for username: ${username}, status: ${response.status}`); // Log failed login attempt
-                alert(data.error || 'Invalid username or password!');
+                console.warn(`Login failed for username: ${username}, status: ${response.status}`);
+                Alert.alert('Login Failed', data.error || 'Invalid username or password!');
             }
         } catch (error) {
-            console.error('Login request error:', error); // Log exceptions
-            alert('Failed to connect to the server.');
+            console.error('Login request error:', error);
+            Alert.alert('Connection Error', 'Failed to connect to the server.');
         }
     };
 
     const handleRegister = () => {
-        console.log('Navigating to Register screen'); // Log navigation event
+        console.log('Navigating to Register screen');
         navigation.navigate('Register');
     };
 
@@ -67,7 +72,6 @@ export default function LoginScreen() {
         </View>
     );
 }
-
 
 // Styles for your LoginScreen component...
 const styles = StyleSheet.create({
