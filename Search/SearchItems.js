@@ -35,7 +35,7 @@ async function SearchItems(locationId, productId) {
         method: "GET",
         cache: "no-cache",
         headers: {
-            Authorization: KROGER_API_KEY, // Replace with your Kroger API key
+            Authorization: KROGER_API_KEY,
             "Content-Type": "application/json; charset=utf-8"
         },
     };
@@ -50,5 +50,4 @@ async function SearchItems(locationId, productId) {
     }
 }
 
-// This function can be imported into other JavaScript files for Kroger store searches by latitude and longitude
 export default SearchItems;

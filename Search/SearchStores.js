@@ -18,7 +18,7 @@ async function getKrogerApiKey() {
 }
 
 // Function to fetch Kroger stores by latitude and longitude
-async function SearchStore(latitude, longitude, radius = 20) {
+async function SearchStore(latitude, longitude, radius) {
     const url = new URL(KROGER_API_URL);
     url.searchParams.append('filter.lat.near', latitude);
     url.searchParams.append('filter.lon.near', longitude);
@@ -31,7 +31,7 @@ async function SearchStore(latitude, longitude, radius = 20) {
         method: 'GET',
         headers: {
             Accept: 'application/json',
-            Authorization: KROGER_API_KEY, // Replace with your Kroger API key
+            Authorization: KROGER_API_KEY,
         },
     };
 
@@ -45,5 +45,4 @@ async function SearchStore(latitude, longitude, radius = 20) {
     }
 }
 
-// This function can be imported into other JavaScript files for Kroger store searches by latitude and longitude
 export default SearchStore;

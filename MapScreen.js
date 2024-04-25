@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, TextInput, Keyboard, ScrollVi
 import MapView, { Marker } from 'react-native-maps';
 import { getLocation } from './LocationService';
 import SearchStore from './Search/SearchStores';
-import { Ionicons } from '@expo/vector-icons'; // Import Ionicons from the vector icons library
+import { Ionicons } from '@expo/vector-icons'; 
 
 const MapScreen = () => {
     const defaultRadius = 20;
@@ -19,7 +19,7 @@ const MapScreen = () => {
             try {
                 const location = await getLocation();
                 setUserLocation(location.coords);
-                fetchNearbyStores(location.coords.latitude, location.coords.longitude, defaultRadius); // Fetch stores with default radius
+                fetchNearbyStores(location.coords.latitude, location.coords.longitude, defaultRadius); 
             } catch (error) {
                 console.error('Error fetching user location:', error);
             }
@@ -56,24 +56,23 @@ const MapScreen = () => {
     };
 
     const handleSearch = () => {
-        if (!isNaN(parseInt(radius))) { // Check if radius is a valid number
-            Keyboard.dismiss(); // Dismiss keyboard
+        if (!isNaN(parseInt(radius))) { 
+            Keyboard.dismiss(); 
             const searchRadius = parseInt(radius);
             if (userLocation) {
                 fetchNearbyStores(userLocation.latitude, userLocation.longitude, searchRadius);
             }
         } else {
-            alert('Please enter a valid number for the radius.'); // Show alert for invalid input
+            alert('Please enter a valid number for the radius.'); 
         }
     };
 
     const handleMarkerPress = (store) => {
-        // Zoom to the selected pin
         const { latitude, longitude } = store.geolocation;
         mapViewRef.current.animateToRegion({
             latitude,
             longitude,
-            latitudeDelta: 0.01, // Adjust the delta values for desired zoom level
+            latitudeDelta: 0.01, 
             longitudeDelta: 0.01,
         });
         
@@ -216,7 +215,7 @@ const styles = StyleSheet.create({
         padding: 20,
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
-        maxHeight: 400, // Set a maximum height for the list
+        maxHeight: 400,
     },
     listHeader: {
         fontSize: 18,
@@ -258,7 +257,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     rotateIcon: {
-        transform: [{ rotate: '90deg' }], // Rotate the icon by 90 degrees
+        transform: [{ rotate: '90deg' }], 
     },
 });
 

@@ -20,11 +20,9 @@ async function getKrogerApiKey() {
 }
 
 async function SearchTerm(locationId, term) {
-    // Get the Kroger API key
     const KROGER_API_KEY = await getKrogerApiKey();
     console.log(KROGER_API_KEY);
 
-    // Construct URL with the Kroger API key
     const url = new URL(KROGER_API_URL);
     url.searchParams.append('filter.term', term);
     console.log(url);
@@ -35,7 +33,7 @@ async function SearchTerm(locationId, term) {
         method: "GET",
         cache: "no-cache",
         headers: {
-            Authorization: KROGER_API_KEY, // Replace with your Kroger API key
+            Authorization: KROGER_API_KEY,
             "Content-Type": "application/json; charset=utf-8"
         },
     };
