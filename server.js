@@ -87,6 +87,30 @@ async function removeItemFromUser(username, upc) {
     }
 }
 
+// Function to get items for a specific user
+async function getItemsForUser(username) {
+    try {
+        await client.connect(); // Ensure the MongoDB client is connected
+        const db = client.db("myNewDatabase"); // Connect to the database
+        const collection = db.collection('items'); // Connect to the 'items' collection
+
+        const document = await collection.findOne({ username: username }); // Find the document for the given username
+        if (document) {
+            console.log("Items found for user:", document.items);
+            return document.items; // Return the items array
+        } else {
+            console.log("No items found for user:", username);
+            return []; // Return an empty array if no document is found
+        }
+    } catch (error) {
+        console.error("Error retrieving items for user:", error);
+        throw error; // Rethrow the error for further handling
+    } finally {
+        await client.close(); // Always close the connection
+    }
+}
+
+
 
 app.post('/register', async (req, res) => {
     const { email, username, password, fullName } = req.body;
@@ -136,11 +160,15 @@ app.post('/addItem', async (req, res) => {
     }
 });
 
-// API endpoint to remove an item from the user's list
 app.post('/removeItem', async (req, res) => {
     const { username, upc } = req.body;
     try {
-        const result = await removeItemFromUser(username, upc);
+        const db = client.db("myNewDatabase");
+        const collection = db.collection('items');
+        const result = await collection.updateOne(
+            { username: username },
+            { $pull: { items: upc } }
+        );
         if (result.modifiedCount > 0) {
             res.status(200).send({ message: 'Item removed successfully' });
         } else {
@@ -148,9 +176,28 @@ app.post('/removeItem', async (req, res) => {
         }
     } catch (error) {
         console.error('Error removing item:', error);
-        res.status(500).send({ error: 'Error removing item' });
+        res.status(500).send({ error: 'Internal server error' });
     }
 });
+
+
+// Endpoint to get items for a specific user
+app.get('/getItems', async (req, res) => {
+    const username = req.query.username; // Get username from the query parameter
+    if (!username) {
+        return res.status(400).send({ error: 'Username parameter is required' });
+    }
+
+    try {
+        const items = await getItemsForUser(username);
+        res.status(200).send(items);
+    } catch (error) {
+        console.error("Failed to get items:", error);
+        res.status(500).send({ error: 'Failed to retrieve items' });
+    }
+});
+
+
 
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);

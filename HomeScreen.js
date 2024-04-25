@@ -1,24 +1,39 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, View, FlatList, Button, TouchableOpacity, TextInput } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { StyleSheet, Text, View, FlatList, Button, TouchableOpacity, TextInput, Image, Alert } from 'react-native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import LoadHomeScreenData from './LoadHomeScreen';
+
 
 const HomeScreen = ({ route }) => {
     const { username } = route.params;
-    const [items, setItems] = useState([]);
-    const navigation = useNavigation();
+    const [products, setProducts] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
+    const navigation = useNavigation();
+
+    const fetchData = useCallback(async () => {
+        try {
+            const response = await fetch(`http://192.168.240.101:2000/getItems?username=${encodeURIComponent(username)}`);
+            const upcCodes = await response.json();
+            if (response.ok) {
+                const items = await LoadHomeScreenData(upcCodes);
+                setProducts(items);
+            } else {
+                throw new Error('Failed to fetch items');
+            }
+        } catch (error) {
+            console.error('Error loading items:', error);
+            Alert.alert('Error', error.message || 'Failed to load items');
+        }
+    }, [username]);
+
+    useFocusEffect(fetchData);
 
     const handleAddItem = (newItem) => {
-        setItems((prevItems) => [...prevItems, newItem]);
+        setProducts((prevProducts) => [...prevProducts, newItem]);
     };
 
     const handleDeleteItem = (index) => {
-        setItems((prevItems) => prevItems.filter((item, i) => i !== index));
-    };
-
-    const addTestItem = () => {
-        const testItem = `Item ${items.length + 1}`;
-        handleAddItem(testItem);
+        setProducts((prevProducts) => prevProducts.filter((item, i) => i !== index));
     };
 
     const handleBarcodeScanned = (data) => {
@@ -26,10 +41,8 @@ const HomeScreen = ({ route }) => {
     };
 
     const handleSearch = () => {
-        // Pass both searchQuery and username to the SearchScreen
         navigation.navigate('Search', { searchQuery: searchQuery, username: username });
     };
-
 
     return (
         <View style={styles.container}>
@@ -38,30 +51,49 @@ const HomeScreen = ({ route }) => {
                 <TextInput
                     style={styles.searchInputTop}
                     placeholder="Search items..."
-                    onChangeText={(text) => setSearchQuery(text)}
+                    onChangeText={setSearchQuery}
                     value={searchQuery}
                 />
                 <Button title="Search" onPress={handleSearch} style={styles.searchButton} />
             </View>
             <FlatList
-                data={items}
-                renderItem={({ item, index }) => (
-                    <View style={styles.listItem}>
-                        <Text>{item}</Text>
-                        <TouchableOpacity onPress={() => handleDeleteItem(index)}>
+                data={products}
+                keyExtractor={(item, index) => index.toString()}
+                renderItem={({ item }) => (
+                    <View style={styles.itemContainer}>
+                        <Image
+                            source={{ uri: item.image }}
+                            style={styles.image}
+                            resizeMode="contain"
+                        />
+                        <View style={styles.textContainer}>
+                            <Text style={styles.descriptionText}>{item.description}</Text>
+                            <Text style={styles.brandText}>Brand: {item.brand}</Text>
+                            {item.inStock ? (
+                                <>
+                                    <Text style={styles.priceText}>Price: ${item.price}</Text>
+                                    <Text style={styles.locationText}>In Stock At: {item.locationName}</Text>
+                                    <Text style={styles.addressText}>Address: {item.address}</Text>
+                                    <Text style={styles.aisleText}>Aisle: {item.aisle}</Text>
+                                </>
+                            ) : (
+                                <Text style={styles.outOfStockText}>Out of Stock!</Text>
+                            )}
+                        </View>
+                        <TouchableOpacity onPress={() => handleDeleteItem(item.id)}>
                             <Text style={styles.deleteText}>Delete</Text>
                         </TouchableOpacity>
                     </View>
                 )}
-                keyExtractor={(item, index) => index.toString()}
             />
             <View style={styles.buttonContainer}>
-                <Button title="Add Test Item" onPress={addTestItem} style={styles.button} />
+                <Button title="Add Test Item" onPress={handleAddItem} style={styles.button} />
                 <Button title="Scan Barcode" onPress={() => navigation.navigate('Camera', { onBarcodeScanned: handleBarcodeScanned })} style={styles.button} />
             </View>
         </View>
     );
 };
+
 
 const styles = StyleSheet.create({
     container: {
@@ -104,7 +136,7 @@ const styles = StyleSheet.create({
         color: '#fff',
         borderRadius: 8,
     },
-    listItem: {
+    itemContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
@@ -123,12 +155,10 @@ const styles = StyleSheet.create({
         color: 'red',
     },
     buttonContainer: {
-        position: 'absolute',
-        bottom: 50,
-        width: '100%',
         flexDirection: 'row',
         justifyContent: 'space-between',
-        paddingHorizontal: 20,
+        width: '100%',
+        marginTop: 10,
     },
     button: {
         flex: 1,
@@ -138,6 +168,47 @@ const styles = StyleSheet.create({
         borderColor: '#ccc',
         backgroundColor: '#fff',
         elevation: 3,
+    },
+    // Additional styles for product details
+    image: {
+        width: 100,
+        height: 100,
+        borderRadius: 10,
+        marginBottom: 10,
+    },
+    textContainer: {
+        flex: 1,
+        marginLeft: 10,
+    },
+    descriptionText: {
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+    brandText: {
+        fontSize: 14,
+        color: 'grey',
+    },
+    priceText: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: 'green',
+    },
+    locationText: {
+        fontSize: 14,
+        color: 'black',
+    },
+    addressText: {
+        fontSize: 14,
+        color: 'grey',
+    },
+    aisleText: {
+        fontSize: 14,
+        color: 'black',
+    },
+    outOfStockText: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: 'red',
     },
 });
 
