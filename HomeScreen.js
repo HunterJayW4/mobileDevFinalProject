@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { StyleSheet, Text, View, FlatList, Button, TouchableOpacity, TextInput, Image, Alert } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import LoadHomeScreenData from './LoadHomeScreen';
+import Constants from 'expo-constants';
 
 
 const HomeScreen = ({ route }) => {
@@ -10,9 +11,13 @@ const HomeScreen = ({ route }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const navigation = useNavigation();
 
+    // Safely get the local IP address
+    const localIp = Constants.expoConfig?.hostUri?.split(':')?.[0] ?? 'localhost';
+    const apiBaseUrl = `http://${localIp}:2000`;
+
     const fetchData = useCallback(async () => {
         try {
-            const response = await fetch(`http://192.168.240.101:2000/getItems?username=${encodeURIComponent(username)}`);
+            const response = await fetch(`${apiBaseUrl}/getItems?username=${encodeURIComponent(username)}`);
             const upcCodes = await response.json();
             if (response.ok) {
                 const items = await LoadHomeScreenData(upcCodes);
@@ -37,7 +42,7 @@ const HomeScreen = ({ route }) => {
             console.log(`Attempting to delete item with UPC: ${upc} for user: ${username}`);
 
             // Make an API call to the server to remove the item
-            const response = await fetch('http://192.168.240.101:2000/removeItem', {
+            const response = await fetch(apiBaseUrl + '/removeItem', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -64,8 +69,6 @@ const HomeScreen = ({ route }) => {
             Alert.alert('Error', error.message || 'Failed to delete item');
         }
     };
-
-
 
 
     const handleBarcodeScanned = (data) => {

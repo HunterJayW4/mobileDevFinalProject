@@ -1,6 +1,6 @@
-// Register.js
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert } from 'react-native';
+import Constants from 'expo-constants';
 
 export default function Register({ navigation }) {
     const [email, setEmail] = useState('');
@@ -8,6 +8,10 @@ export default function Register({ navigation }) {
     const [password, setPassword] = useState('');
     const [repeatPassword, setRepeatPassword] = useState('');
     const [fullName, setFullName] = useState('');
+
+    // Dynamically determine the API URL
+    const localIp = Constants.expoConfig?.hostUri?.split(':')?.[0] ?? 'localhost';
+    const apiBaseUrl = `http://${localIp}:2000`;
 
     const handleSubmit = async () => {
         console.log("Attempting to submit registration form");
@@ -18,11 +22,8 @@ export default function Register({ navigation }) {
             return;
         }
 
-        console.log("Preparing to send request to the server");
-        console.log("Payload:", { email, username, password, fullName }); // Log the data being sent; remove or mask sensitive data like password in a production environment
-
         try {
-            const response = await fetch('http://192.168.240.101:2000/register', {
+            const response = await fetch(`${apiBaseUrl}/register`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -30,7 +31,7 @@ export default function Register({ navigation }) {
                 body: JSON.stringify({
                     email: email,
                     username: username,
-                    password: password, // Note: Password should be hashed on the server before storing
+                    password: password,
                     fullName: fullName,
                 }),
             });
@@ -52,8 +53,6 @@ export default function Register({ navigation }) {
             Alert.alert('Error', error.message);
         }
     };
-
-
 
     return (
         <View style={styles.container}>
