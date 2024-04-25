@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, StyleSheet, Image, TouchableOpacity, Alert } from 'react-native';
 import SearchTerm from './Search/SearchTerm';
 import { getLocation } from './LocationService';
 import SearchStore from './Search/SearchStores';
 
 const SearchScreen = ({ navigation, route }) => {
-    const { searchQuery } = route.params;
+    const { searchQuery, username } = route.params;
     const [searchResults, setSearchResults] = useState([]);
 
     useEffect(() => {
@@ -39,6 +39,7 @@ const SearchScreen = ({ navigation, route }) => {
 
                             itemArray.push({
                                 id: index,
+                                upc: itemData.productId, // Assuming the UPC is stored under productId
                                 image,
                                 description,
                                 brand,
@@ -56,8 +57,39 @@ const SearchScreen = ({ navigation, route }) => {
             }
         } catch (error) {
             console.error('Error searching items:', error);
+            Alert.alert('Error', 'Failed to load items');
         }
     };
+
+    const addItemToList = async (item) => {
+        try {
+            const response = await fetch('http://192.168.240.101:2000/addItem', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    username: username, // Assume username is a string variable containing the user's username
+                    upc: item.upc // Make sure the property name matches the actual property in the item object
+                }),
+            });
+
+            if (response.ok) {
+                Alert.alert('Success', 'Item added successfully');
+            } else {
+                // Retrieve the response body to get detailed error info from the server
+                const errorData = await response.json();  // Assumes the server responds with JSON data
+                console.error('API responded with a non-ok status:', response.status);
+                console.error('Error details:', errorData);
+                throw new Error(`Failed to add item: ${errorData.message || 'Unknown error'}`);
+            }
+        } catch (error) {
+            console.error('Error adding item to list:', error);
+            Alert.alert('Error', `Failed to add item to list: ${error.message}`);
+        }
+    };
+
+
 
     return (
         <View style={styles.container}>
@@ -84,7 +116,7 @@ const SearchScreen = ({ navigation, route }) => {
                                 <Text style={styles.outOfStockText}>Out of Stock!</Text>
                             )}
                         </View>
-                        <TouchableOpacity style={styles.addButton} onPress={() => console.log('Add to list pressed', item)}>
+                        <TouchableOpacity style={styles.addButton} onPress={() => addItemToList(item)}>
                             <Text style={styles.addButtonText}>Add to List</Text>
                         </TouchableOpacity>
                     </View>
@@ -98,7 +130,7 @@ const SearchScreen = ({ navigation, route }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: 'lightgrey',
+        backgroundColor: '#f5f5f5',
         justifyContent: 'center',
     },
     itemContainer: {
