@@ -73,19 +73,21 @@ async function removeItemFromUser(username, upc) {
     const db = client.db("myNewDatabase");
     const collection = db.collection('items');
     try {
-        await client.connect();
+        await client.connect();  // Ensure the client is connected before attempting the operation
         const result = await collection.updateOne(
             { username: username },
-            { $pull: { items: upc } }  // $pull removes the item from the array
+            { $pull: { items: upc } }  // Use $pull to remove the item from the array
         );
-        return result;
+        return result;  // This will return the result of the update operation
     } catch (error) {
         console.error("Error removing item from user", error);
-        throw error;
+        throw error;  // Rethrow the error to handle it in the calling function
     } finally {
-        await client.close();
+        await client.close();  // Always close the connection to avoid leaks
     }
 }
+
+
 
 // Function to get items for a specific user
 async function getItemsForUser(username) {
@@ -163,12 +165,8 @@ app.post('/addItem', async (req, res) => {
 app.post('/removeItem', async (req, res) => {
     const { username, upc } = req.body;
     try {
-        const db = client.db("myNewDatabase");
-        const collection = db.collection('items');
-        const result = await collection.updateOne(
-            { username: username },
-            { $pull: { items: upc } }
-        );
+        // Call the new delete function instead of directly interacting with the database
+        const result = await removeItemFromUser(username, upc);
         if (result.modifiedCount > 0) {
             res.status(200).send({ message: 'Item removed successfully' });
         } else {
@@ -179,6 +177,7 @@ app.post('/removeItem', async (req, res) => {
         res.status(500).send({ error: 'Internal server error' });
     }
 });
+
 
 
 // Endpoint to get items for a specific user

@@ -32,9 +32,41 @@ const HomeScreen = ({ route }) => {
         setProducts((prevProducts) => [...prevProducts, newItem]);
     };
 
-    const handleDeleteItem = (index) => {
-        setProducts((prevProducts) => prevProducts.filter((item, i) => i !== index));
+    const handleDeleteItem = async (upc) => {
+        try {
+            console.log(`Attempting to delete item with UPC: ${upc} for user: ${username}`);
+
+            // Make an API call to the server to remove the item
+            const response = await fetch('http://192.168.240.101:2000/removeItem', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username, upc })
+            });
+
+            const result = await response.json();
+
+            // Log the response from the server for debugging
+            console.log('Server response:', result);
+
+            if (!response.ok) {
+                throw new Error(result.error || 'Failed to delete item');
+            }
+
+            // Log success for debugging
+            console.log(`Successfully deleted item with UPC: ${upc}`);
+
+            // Reload the data after deleting
+            await fetchData();
+        } catch (error) {
+            console.error('Error deleting item:', error);
+            Alert.alert('Error', error.message || 'Failed to delete item');
+        }
     };
+
+
+
 
     const handleBarcodeScanned = (data) => {
         handleAddItem(data);
@@ -80,12 +112,14 @@ const HomeScreen = ({ route }) => {
                                 <Text style={styles.outOfStockText}>Out of Stock!</Text>
                             )}
                         </View>
-                        <TouchableOpacity onPress={() => handleDeleteItem(item.id)}>
+                        <TouchableOpacity onPress={() => handleDeleteItem(item.upc)}>
                             <Text style={styles.deleteText}>Delete</Text>
                         </TouchableOpacity>
                     </View>
                 )}
             />
+
+
             <View style={styles.buttonContainer}>
                 <Button title="Add Test Item" onPress={handleAddItem} style={styles.button} />
                 <Button title="Scan Barcode" onPress={() => navigation.navigate('Camera', { onBarcodeScanned: handleBarcodeScanned })} style={styles.button} />
