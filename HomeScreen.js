@@ -26,12 +26,23 @@ const HomeScreen = ({ route }) => {
     };
 
     const handleSearch = () => {
-        navigation.navigate('Search', { searchQuery: searchQuery });
+        // Pass both searchQuery and username to the SearchScreen
+        navigation.navigate('Search', { searchQuery: searchQuery, username: username });
     };
+
 
     return (
         <View style={styles.container}>
             <Text style={styles.title}>{username}'s List</Text>
+            <View style={styles.searchContainer}>
+                <TextInput
+                    style={styles.searchInputTop}
+                    placeholder="Search items..."
+                    onChangeText={(text) => setSearchQuery(text)}
+                    value={searchQuery}
+                />
+                <Button title="Search" onPress={handleSearch} style={styles.searchButton} />
+            </View>
             <FlatList
                 data={items}
                 renderItem={({ item, index }) => (
@@ -47,13 +58,6 @@ const HomeScreen = ({ route }) => {
             <View style={styles.buttonContainer}>
                 <Button title="Add Test Item" onPress={addTestItem} style={styles.button} />
                 <Button title="Scan Barcode" onPress={() => navigation.navigate('Camera', { onBarcodeScanned: handleBarcodeScanned })} style={styles.button} />
-                <TextInput
-                    style={styles.searchInput}
-                    placeholder="Search items..."
-                    onChangeText={(text) => setSearchQuery(text)}
-                    value={searchQuery}
-                />
-                <Button title="Search" onPress={handleSearch} style={styles.button} />
             </View>
         </View>
     );
@@ -64,14 +68,41 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#f5f5f5',
         alignItems: 'center',
-        justifyContent: 'center',
+        justifyContent: 'flex-start',
         padding: 20,
     },
     title: {
         fontSize: 24,
         fontWeight: 'bold',
-        marginBottom: 20,
         color: '#333',
+        marginBottom: 10,
+    },
+    searchContainer: {
+        flexDirection: 'row',
+        width: '100%',
+        marginBottom: 20,
+    },
+    searchInputTop: {
+        flex: 1,
+        borderWidth: 1,
+        borderColor: 'gray',
+        paddingHorizontal: 10,
+        paddingVertical: 8, // Increased padding for taller input box
+        borderRadius: 8,
+        marginRight: 10, // Right margin for spacing between input and button
+        backgroundColor: '#fff',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 1.5,
+        elevation: 3,
+    },
+    searchButton: {
+        paddingHorizontal: 20,
+        paddingVertical: 8,
+        backgroundColor: '#007AFF', // Default iOS button color
+        color: '#fff',
+        borderRadius: 8,
     },
     listItem: {
         flexDirection: 'row',
@@ -95,19 +126,18 @@ const styles = StyleSheet.create({
         position: 'absolute',
         bottom: 50,
         width: '100%',
-        flexDirection: 'row', // Set flexDirection to row to align children horizontally
-        justifyContent: 'space-around', // Distributes space evenly around each button
+        flexDirection: 'row',
+        justifyContent: 'space-between',
         paddingHorizontal: 20,
     },
     button: {
-        flex: 1, // Each button will take an equal portion of the container
-    },
-    searchInput: {
-        flex: 1, // Ensure the input also takes an equal portion of the space
+        flex: 1,
+        marginHorizontal: 5,
+        borderRadius: 8,
         borderWidth: 1,
-        borderColor: 'gray',
-        paddingHorizontal: 10,
-        marginRight: 10, // Optional margin for spacing
+        borderColor: '#ccc',
+        backgroundColor: '#fff',
+        elevation: 3,
     },
 });
 

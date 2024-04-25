@@ -48,6 +48,45 @@ async function findUserByUsername(username) {
     }
 }
 
+// Function to add an item to a user's item list
+async function addItemToUser(username, upc) {
+    const db = client.db("myNewDatabase");
+    const collection = db.collection('items');
+    try {
+        await client.connect();
+        const result = await collection.updateOne(
+            { username: username },
+            { $addToSet: { items: upc } },  // Use $addToSet to avoid duplicate items
+            { upsert: true }  // Creates a new document if no document matches the query
+        );
+        return result;
+    } catch (error) {
+        console.error("Error adding item to user", error);
+        throw error;
+    } finally {
+        await client.close();
+    }
+}
+
+// Function to remove an item from a user's item list
+async function removeItemFromUser(username, upc) {
+    const db = client.db("myNewDatabase");
+    const collection = db.collection('items');
+    try {
+        await client.connect();
+        const result = await collection.updateOne(
+            { username: username },
+            { $pull: { items: upc } }  // $pull removes the item from the array
+        );
+        return result;
+    } catch (error) {
+        console.error("Error removing item from user", error);
+        throw error;
+    } finally {
+        await client.close();
+    }
+}
+
 
 app.post('/register', async (req, res) => {
     const { email, username, password, fullName } = req.body;
@@ -78,6 +117,38 @@ app.post('/login', async (req, res) => {
         res.status(500).send({ error: 'Internal server error' });
     } finally {
         await client.close();
+    }
+});
+
+// API endpoint to add an item to the user's list
+app.post('/addItem', async (req, res) => {
+    const { username, upc } = req.body;
+    try {
+        const result = await addItemToUser(username, upc);
+        if (result.modifiedCount > 0 || result.upsertedCount > 0) {
+            res.status(200).send({ message: 'Item added successfully' });
+        } else {
+            res.status(404).send({ error: 'Item not added' });
+        }
+    } catch (error) {
+        console.error('Error adding item:', error);
+        res.status(500).send({ error: 'Error adding item' });
+    }
+});
+
+// API endpoint to remove an item from the user's list
+app.post('/removeItem', async (req, res) => {
+    const { username, upc } = req.body;
+    try {
+        const result = await removeItemFromUser(username, upc);
+        if (result.modifiedCount > 0) {
+            res.status(200).send({ message: 'Item removed successfully' });
+        } else {
+            res.status(404).send({ error: 'Item not found or not removed' });
+        }
+    } catch (error) {
+        console.error('Error removing item:', error);
+        res.status(500).send({ error: 'Error removing item' });
     }
 });
 
