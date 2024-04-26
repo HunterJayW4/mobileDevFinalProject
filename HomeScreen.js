@@ -104,16 +104,10 @@ const HomeScreen = ({ route }) => {
                         <View style={styles.textContainer}>
                             <Text style={styles.descriptionText}>{item.description}</Text>
                             <Text style={styles.brandText}>Brand: {item.brand}</Text>
-                            {item.inStock ? (
-                                <>
-                                    <Text style={styles.priceText}>Price: ${item.price}</Text>
-                                    <Text style={styles.locationText}>In Stock At: {item.locationName}</Text>
-                                    <Text style={styles.addressText}>Address: {item.address}</Text>
-                                    <Text style={styles.aisleText}>Aisle: {item.aisle}</Text>
-                                </>
-                            ) : (
-                                <Text style={styles.outOfStockText}>Out of Stock!</Text>
-                            )}
+                            <Text style={styles.priceText}>Price: ${item.price}</Text>
+                            <Text style={styles.locationText}>In Stock At: {item.locationName}</Text>
+                            <Text style={styles.addressText}>Address: {item.address}</Text>
+                            <Text style={styles.aisleText}>Aisle: {item.aisle}</Text>
                         </View>
                         <TouchableOpacity onPress={() => handleDeleteItem(item.upc)}>
                             <Text style={styles.deleteText}>Delete</Text>
@@ -124,7 +118,7 @@ const HomeScreen = ({ route }) => {
 
 
             <View style={styles.buttonContainer}>
-                <Button title="Scan Barcode" onPress={() => navigation.navigate('Camera', { onBarcodeScanned: handleBarcodeScanned })} style={styles.button} />
+                <Button title="Scan Barcode" onPress={() => navigation.navigate('Camera', { onBarcodeScanned: handleBarcodeScanned, username: username })} style={styles.button} />
             </View>
         </View>
     );
