@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Constants from 'expo-constants';
 
@@ -47,6 +47,11 @@ export default function LoginScreen() {
 
     return (
         <View style={styles.container}>
+            <Image
+                source = {require('./assets/groceryhoundlogo.png')}
+                style = {styles.logo}
+                resizeMode = "contain"
+            />
             <Text style={styles.title}>Welcome to GroceryHound</Text>
             <TextInput
                 style={styles.input}
@@ -75,6 +80,10 @@ export default function LoginScreen() {
 
 // Styles for your LoginScreen component...
 const styles = StyleSheet.create({
+    logo: {
+        width: 375,
+        height: 200,
+    },
     container: {
         flex: 1,
         backgroundColor: '#fff',

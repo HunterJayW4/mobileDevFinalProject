@@ -124,13 +124,11 @@ const HomeScreen = ({ route }) => {
 
 
             <View style={styles.buttonContainer}>
-                <Button title="Add Test Item" onPress={handleAddItem} style={styles.button} />
                 <Button title="Scan Barcode" onPress={() => navigation.navigate('Camera', { onBarcodeScanned: handleBarcodeScanned })} style={styles.button} />
             </View>
         </View>
     );
 };
-
 
 const styles = StyleSheet.create({
     container: {
@@ -193,9 +191,10 @@ const styles = StyleSheet.create({
     },
     buttonContainer: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
+        justifyContent: 'center',
         width: '100%',
         marginTop: 10,
+        marginBottom: 30,
     },
     button: {
         flex: 1,
