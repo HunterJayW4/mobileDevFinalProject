@@ -1,11 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import { Button, View, StyleSheet, Text, Modal, Image, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, Alert, StyleSheet, Modal, Button, Image } from 'react-native';
 import { Camera } from 'expo-camera';
-import { getLocation } from './LocationService';
-import SearchItems from './Search/SearchItems';
+import Constants from 'expo-constants';
+import * as Location from 'expo-location';
 import SearchStore from './Search/SearchStores';
+import SearchItems from './Search/SearchItems';
 
-const CameraScreen = () => {
+const CameraScreen = ({ route }) => {
+    const { username } = route.params;
+    const [item, setItem] = useState(null);
     const [cameraType, setCameraType] = useState(Camera.Constants.Type.back);
     const [showPopup, setShowPopup] = useState(false);
     const [processingBarcodeResult, setProcessingBarcodeResult] = useState(false);
@@ -15,6 +18,8 @@ const CameraScreen = () => {
     const [itemData, setItemData] = useState(null);
     const [locationData, setLocationData] = useState(null);
     const [invalidBarcodeScanned, setInvalidBarcodeScanned] = useState(false);
+    const localIp = Constants.expoConfig?.hostUri?.split(':')?.[0] ?? 'localhost';
+    const apiBaseUrl = `http://${localIp}:2000`;
 
     useEffect(() => {
         (async () => {
@@ -24,6 +29,60 @@ const CameraScreen = () => {
             }
         })();
     }, []);
+
+    const addItemToList = async (item) => {
+        // Check if item has a upc property
+        if (!item || !item.upc) {
+            console.error('Invalid item:', item);
+            Alert.alert('Error', 'Invalid item');
+            return;
+        }
+        try {
+            console.log('About to fetch');
+            const response = await fetch(apiBaseUrl + '/addItem', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    username: username, // Assume username is a string variable containing the user's username
+                    upc: item.upc // Make sure the property name matches the actual property in the item object
+                }),
+            });
+            console.log('Fetch Complete');
+
+            if (response.ok) {
+                console.log('Response status is OK');
+                Alert.alert('Success', 'Item added successfully');
+            } else {
+                console.log('Response status is not OK');
+                // Retrieve the response body to get detailed error info from the server
+                const errorData = await response.json();  // Assumes the server responds with JSON data
+                console.error('API responded with a non-ok status:', response.status);
+                console.error('Error details:', errorData);
+                throw new Error(`Failed to add item: ${errorData.message || 'Unknown error'}`);
+            }
+        } catch (error) {
+            console.error('Error adding item to list:', error);
+            Alert.alert('Error', `Failed to add item to list: ${error.message}`);
+        }
+    };
+
+    const getLocation = async () => {
+        try {
+            const { status } = await Location.requestForegroundPermissionsAsync();
+            if (status !== 'granted') {
+                Alert.alert('Permission to access location was denied');
+                return;
+            }
+    
+            const location = await Location.getCurrentPositionAsync({});
+            return location;
+        } catch (error) {
+            console.error('Error getting location:', error);
+            Alert.alert('Error', `Failed to get location: ${error.message}`);
+        }
+    };
 
     const toggleCameraType = () => {
         setCameraType(
@@ -55,6 +114,20 @@ const CameraScreen = () => {
                         setPopupItems(itemsData);
                         setPopupData(data);
                         setShowPopup(true);
+    
+                        // Create an item object with the fetched data
+                        const fetchedDataItem = {
+                            upc: data,
+                            name: itemsData.data[0].name,
+                            price: itemsData.data[0].price,
+                            image: itemsData.data[0].image,
+                            store: storeData.data[0].name,
+                            location: storeData.data[0].location,
+                            // ...other item properties
+                        };
+    
+                        // Set the item state with the fetched item data
+                        setItem(fetchedDataItem);
                     } else {
                         setInvalidBarcodeScanned(true);
                     }
@@ -115,6 +188,9 @@ const CameraScreen = () => {
                             )}
                         </View>
                     </View>
+                    <TouchableOpacity style={styles.addButton} onPress={() => addItemToList(item)}>
+                        <Text style={styles.addButtonText}>Add to List</Text>
+                    </TouchableOpacity>
                     <TouchableOpacity onPress={closePopup} style={styles.closeButton}>
                         <Text style={styles.closeButtonText}>Close</Text>
                     </TouchableOpacity>
@@ -142,6 +218,10 @@ const CameraScreen = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+    },
+    addButtonText: {
+        color: 'white',
+        fontSize: 16,
     },
     camera: {
         flex: 1,
@@ -196,6 +276,12 @@ const styles = StyleSheet.create({
     },
     aisleText: {
         marginBottom: 5,
+    },
+    addButton: {
+        marginTop: 20,
+        padding: 10,
+        backgroundColor: 'blue',
+        borderRadius: 5,
     },
     closeButton: {
         marginTop: 20,

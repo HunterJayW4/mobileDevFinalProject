@@ -67,7 +67,14 @@ const SearchScreen = ({ navigation, route }) => {
     };
 
     const addItemToList = async (item) => {
+        // Check if item has a upc property
+        if (!item || !item.upc) {
+            console.error('Invalid item:', item);
+            Alert.alert('Error', 'Invalid item');
+            return;
+        }
         try {
+            console.log('About to fetch');
             const response = await fetch(apiBaseUrl + '/addItem', {
                 method: 'POST',
                 headers: {
@@ -78,10 +85,13 @@ const SearchScreen = ({ navigation, route }) => {
                     upc: item.upc // Make sure the property name matches the actual property in the item object
                 }),
             });
+            console.log('Fetch Complete');
 
             if (response.ok) {
+                console.log('Response status is OK');
                 Alert.alert('Success', 'Item added successfully');
             } else {
+                console.log('Response status is not OK');
                 // Retrieve the response body to get detailed error info from the server
                 const errorData = await response.json();  // Assumes the server responds with JSON data
                 console.error('API responded with a non-ok status:', response.status);
