@@ -119,6 +119,7 @@ const HomeScreen = ({ route }) => {
 
             <View style={styles.buttonContainer}>
                 <Button title="Scan Barcode" onPress={() => navigation.navigate('Camera', { onBarcodeScanned: handleBarcodeScanned, username: username })} style={styles.button} />
+                <Button title="Locate Stores" onPress={() => navigation.navigate('Stores')} />
             </View>
         </View>
     );
