@@ -6,6 +6,7 @@ import Register from './Register'; // Make sure the path to Register.js is corre
 import LoginScreen from './LoginScreen'; // If App is a screen you intend to navigate to, ensure it doesn't recursively include the Navigator
 import CameraScreen from './CameraScreen'; // Open when scanning barcodes
 import SearchScreen from './SearchScreen'; // Opens search of items
+import MapScreen from './MapScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -18,6 +19,7 @@ function AppNavigator() {
                 <Stack.Screen name="Register" component={Register} />
                 <Stack.Screen name="Camera" component={CameraScreen} />
                 <Stack.Screen name="Search" component={SearchScreen} />
+                <Stack.Screen name="Stores" component={MapScreen} />
             </Stack.Navigator>
         </NavigationContainer>
     );
