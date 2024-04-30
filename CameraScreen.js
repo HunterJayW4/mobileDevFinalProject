@@ -30,9 +30,9 @@ const CameraScreen = ({ route }) => {
         })();
     }, []);
 
-    const addItemToList = async (item) => {
+    const addItemToList = async () => {
         // Check if item has a upc property
-        if (!item || !item.upc) {
+        if (!itemData || !itemData.data[0]?.productId) {
             console.error('Invalid item:', item);
             Alert.alert('Error', 'Invalid item');
             return;
@@ -46,27 +46,25 @@ const CameraScreen = ({ route }) => {
                 },
                 body: JSON.stringify({
                     username: username, // Assume username is a string variable containing the user's username
-                    upc: item.upc // Make sure the property name matches the actual property in the item object
+                    upc: itemData.data[0].productId, // Make sure the property name matches the actual property in the item object
+                    image: "https://www.kroger.com/product/images/large/front/0" + barcodeData.slice(0, -1),
+                    description: itemData?.data[0]?.description ?? 'N/A',
+                    brand: itemData?.data[0]?.brand ?? 'N/A',
+                    price: itemData?.data[0]?.items[0]?.price?.regular,
+                    inStock: itemData?.data[0]?.items[0]?.fulfillment?.inStore,
+                    address: locationData?.data?.[0]?.address?.addressLine1 ?? 'N/A',
+                    aisle: itemData?.data[0].aisleLocations?.[0]?.number ?? 'N/A',
+                    locationName: locationData?.data?.[0]?.name ?? 'N/A'
                 }),
             });
             console.log('Fetch Complete');
-
-            if (response.ok) {
-                console.log('Response status is OK');
-                Alert.alert('Success', 'Item added successfully');
-            } else {
-                console.log('Response status is not OK');
-                // Retrieve the response body to get detailed error info from the server
-                const errorData = await response.json();  // Assumes the server responds with JSON data
-                console.error('API responded with a non-ok status:', response.status);
-                console.error('Error details:', errorData);
-                throw new Error(`Failed to add item: ${errorData.message || 'Unknown error'}`);
-            }
+            Alert.alert('Success', 'Item added successfully');
         } catch (error) {
             console.error('Error adding item to list:', error);
             Alert.alert('Error', `Failed to add item to list: ${error.message}`);
         }
     };
+
 
     const getLocation = async () => {
         try {
@@ -114,20 +112,7 @@ const CameraScreen = ({ route }) => {
                         setPopupItems(itemsData);
                         setPopupData(data);
                         setShowPopup(true);
-    
-                        // Create an item object with the fetched data
-                        const fetchedDataItem = {
-                            upc: data,
-                            name: itemsData.data[0].name,
-                            price: itemsData.data[0].price,
-                            image: itemsData.data[0].image,
-                            store: storeData.data[0].name,
-                            location: storeData.data[0].location,
-                            // ...other item properties
-                        };
-    
-                        // Set the item state with the fetched item data
-                        setItem(fetchedDataItem);
+
                     } else {
                         setInvalidBarcodeScanned(true);
                     }
@@ -188,7 +173,7 @@ const CameraScreen = ({ route }) => {
                             )}
                         </View>
                     </View>
-                    <TouchableOpacity style={styles.addButton} onPress={() => addItemToList(item)}>
+                    <TouchableOpacity style={styles.addButton} onPress={() => addItemToList()}>
                         <Text style={styles.addButtonText}>Add to List</Text>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={closePopup} style={styles.closeButton}>

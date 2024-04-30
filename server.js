@@ -20,8 +20,23 @@ const client = new MongoClient(uri, {
     }
 });
 
+// Function to connect to the database
+async function connectToDatabase() {
+    try {
+        await client.connect();
+        console.log("Connected to the database");
+    } catch (error) {
+        console.error("Error connecting to the database:", error);
+        throw error;
+    }
+}
+
+// Call connectToDatabase to establish the connection
+connectToDatabase();
+
+// Function to create a new user
 async function createUser(email, username, password, fullName) {
-    const db = client.db("myNewDatabase"); // Ensure you replace "myNewDatabase" with your actual database name
+    const db = client.db("myNewDatabase");
     const collection = db.collection('users');
     try {
         const newUser = { email, username, password, fullName };
@@ -33,105 +48,75 @@ async function createUser(email, username, password, fullName) {
     }
 }
 
+// Function to find a user by username
 async function findUserByUsername(username) {
-    const db = client.db("myNewDatabase"); // Adjust if you have a different database name
+    const db = client.db("myNewDatabase");
     const collection = db.collection('users');
     try {
-        await client.connect();
         const user = await collection.findOne({ username: username });
         return user;
     } catch (error) {
         console.error("Error fetching user by username", error);
         throw error;
-    } finally {
-        await client.close();
     }
 }
 
 // Function to add an item to a user's item list
-async function addItemToUser(username, upc) {
+async function addItemToUser(item) {
     const db = client.db("myNewDatabase");
-    const collection = db.collection('items');
+    const collection = db.collection('userItems');
     try {
-        await client.connect();
-        const result = await collection.updateOne(
-            { username: username },
-            { $addToSet: { items: upc } },  // Use $addToSet to avoid duplicate items
-            { upsert: true }  // Creates a new document if no document matches the query
-        );
+        const result = await collection.insertOne(item);
         return result;
     } catch (error) {
         console.error("Error adding item to user", error);
         throw error;
-    } finally {
-        await client.close();
     }
 }
 
 // Function to remove an item from a user's item list
 async function removeItemFromUser(username, upc) {
     const db = client.db("myNewDatabase");
-    const collection = db.collection('items');
+    const collection = db.collection('userItems');
     try {
-        await client.connect();  // Ensure the client is connected before attempting the operation
-        const result = await collection.updateOne(
-            { username: username },
-            { $pull: { items: upc } }  // Use $pull to remove the item from the array
-        );
-        return result;  // This will return the result of the update operation
+        const result = await collection.deleteOne({ username: username, upc: upc });
+        return result;
     } catch (error) {
         console.error("Error removing item from user", error);
-        throw error;  // Rethrow the error to handle it in the calling function
-    } finally {
-        await client.close();  // Always close the connection to avoid leaks
+        throw error;
     }
 }
-
-
 
 // Function to get items for a specific user
 async function getItemsForUser(username) {
+    const db = client.db("myNewDatabase");
+    const collection = db.collection('userItems');
     try {
-        await client.connect(); // Ensure the MongoDB client is connected
-        const db = client.db("myNewDatabase"); // Connect to the database
-        const collection = db.collection('items'); // Connect to the 'items' collection
-
-        const document = await collection.findOne({ username: username }); // Find the document for the given username
-        if (document) {
-            console.log("Items found for user:", document.items);
-            return document.items; // Return the items array
-        } else {
-            console.log("No items found for user:", username);
-            return []; // Return an empty array if no document is found
-        }
+        const cursor = collection.find({ username: username });
+        const items = await cursor.toArray();
+        return items;
     } catch (error) {
         console.error("Error retrieving items for user:", error);
-        throw error; // Rethrow the error for further handling
-    } finally {
-        await client.close(); // Always close the connection
+        throw error;
     }
 }
 
-
-
+// Endpoint to register a new user
 app.post('/register', async (req, res) => {
     const { email, username, password, fullName } = req.body;
     try {
-        await client.connect(); // Ensure MongoDB client is connected
         const result = await createUser(email, username, password, fullName);
         res.status(201).send({ message: 'User registered', userId: result.insertedId });
     } catch (error) {
         console.error('Error registering user:', error);
         res.status(500).send({ error: 'Error registering user' });
-    } finally {
-        await client.close(); // Ensure MongoDB client is closed after the operation
     }
 });
 
+// Endpoint to authenticate a user
 app.post('/login', async (req, res) => {
     const { username, password } = req.body;
     try {
-        await client.connect();
         const user = await findUserByUsername(username);
         if (user && user.password === password) {
             res.status(200).send({ message: 'Login successful', user: { username: user.username, email: user.email } });
@@ -141,33 +126,28 @@ app.post('/login', async (req, res) => {
     } catch (error) {
         console.error('Error during login:', error);
         res.status(500).send({ error: 'Internal server error' });
-    } finally {
-        await client.close();
     }
 });
 
-// API endpoint to add an item to the user's list
+// Endpoint to add an item to the user's list
 app.post('/addItem', async (req, res) => {
-    const { username, upc } = req.body;
+    const { username, upc, image, description, brand, price, inStock, address, aisle, locationName } = req.body;
+    const item = { username, upc, image, description, brand, price, inStock, address, aisle, locationName };
     try {
-        const result = await addItemToUser(username, upc);
-        if (result.modifiedCount > 0 || result.upsertedCount > 0) {
-            res.status(200).send({ message: 'Item added successfully' });
-        } else {
-            res.status(404).send({ error: 'Item not added' });
-        }
+        await addItemToUser(item);
+        res.status(200).send({ message: 'Item added successfully' });
     } catch (error) {
-        console.error('Error adding item:', error);
-        res.status(500).send({ error: 'Error adding item' });
+        console.error("Error adding item: ", error);
+        res.status(500).send({ error: 'Internal server error' });
     }
 });
 
+// Endpoint to remove an item from the user's list
 app.post('/removeItem', async (req, res) => {
     const { username, upc } = req.body;
     try {
-        // Call the new delete function instead of directly interacting with the database
         const result = await removeItemFromUser(username, upc);
-        if (result.modifiedCount > 0) {
+        if (result.deletedCount > 0) {
             res.status(200).send({ message: 'Item removed successfully' });
         } else {
             res.status(404).send({ error: 'Item not found or not removed' });
@@ -178,11 +158,9 @@ app.post('/removeItem', async (req, res) => {
     }
 });
 
-
-
 // Endpoint to get items for a specific user
 app.get('/getItems', async (req, res) => {
-    const username = req.query.username; // Get username from the query parameter
+    const username = req.query.username;
     if (!username) {
         return res.status(400).send({ error: 'Username parameter is required' });
     }
@@ -195,8 +173,6 @@ app.get('/getItems', async (req, res) => {
         res.status(500).send({ error: 'Failed to retrieve items' });
     }
 });
-
-
 
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);

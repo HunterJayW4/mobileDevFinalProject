@@ -40,20 +40,18 @@ const SearchScreen = ({ navigation, route }) => {
                             const address = locationData?.address?.addressLine1 ?? 'N/A';
                             const aisle = itemData?.aisleLocations?.[0]?.number ?? 'N/A';
                             const inStock = itemData?.items[0]?.fulfillment?.inStore;
-                            const outOfStock = !inStock;
 
                             itemArray.push({
                                 id: index,
                                 upc: itemData.productId, // Assuming the UPC is stored under productId
-                                image,
-                                description,
-                                brand,
-                                price,
-                                locationName,
-                                address,
-                                aisle,
-                                inStock,
-                                outOfStock
+                                image: image,
+                                description: description,
+                                brand: brand,
+                                price: price,
+                                locationName: locationName,
+                                address: address,
+                                aisle: aisle,
+                                inStock: inStock,
                             });
                         }
                         setSearchResults(itemArray);
@@ -82,22 +80,19 @@ const SearchScreen = ({ navigation, route }) => {
                 },
                 body: JSON.stringify({
                     username: username, // Assume username is a string variable containing the user's username
-                    upc: item.upc // Make sure the property name matches the actual property in the item object
+                    upc: item.upc, // Make sure the property name matches the actual property in the item object
+                    image: item.image,
+                    description: item.description,
+                    brand: item.brand,
+                    price: item.price,
+                    inStock: item.inStock,
+                    address: item.address,
+                    aisle: item.aisle,
+                    locationName: item.locationName
                 }),
             });
             console.log('Fetch Complete');
-
-            if (response.ok) {
-                console.log('Response status is OK');
-                Alert.alert('Success', 'Item added successfully');
-            } else {
-                console.log('Response status is not OK');
-                // Retrieve the response body to get detailed error info from the server
-                const errorData = await response.json();  // Assumes the server responds with JSON data
-                console.error('API responded with a non-ok status:', response.status);
-                console.error('Error details:', errorData);
-                throw new Error(`Failed to add item: ${errorData.message || 'Unknown error'}`);
-            }
+            Alert.alert('Success', 'Item added successfully');
         } catch (error) {
             console.error('Error adding item to list:', error);
             Alert.alert('Error', `Failed to add item to list: ${error.message}`);
