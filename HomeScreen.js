@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { StyleSheet, Text, View, FlatList, Button, TouchableOpacity, TextInput, Image, Alert } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import LoadHomeScreenData from './LoadHomeScreen';
 import Constants from 'expo-constants';
-
 
 const HomeScreen = ({ route }) => {
     const { username } = route.params;
@@ -15,21 +13,20 @@ const HomeScreen = ({ route }) => {
     const localIp = Constants.expoConfig?.hostUri?.split(':')?.[0] ?? 'localhost';
     const apiBaseUrl = `http://${localIp}:2000`;
 
-    const fetchData = useCallback(async () => {
-        try {
-            const response = await fetch(`${apiBaseUrl}/getItems?username=${encodeURIComponent(username)}`);
-            const upcCodes = await response.json();
-            if (response.ok) {
-                const items = await LoadHomeScreenData(upcCodes);
+    const fetchData = useCallback(() => {
+        const fetchItems = async () => {
+            try {
+                const response = await fetch(`${apiBaseUrl}/getItems?username=${encodeURIComponent(username)}`);
+                const items = await response.json();
                 setProducts(items);
-            } else {
-                throw new Error('Failed to fetch items');
+            } catch (error) {
+                console.error('Error loading items:', error);
+                Alert.alert('Error', error.message || 'Failed to load items');
             }
-        } catch (error) {
-            console.error('Error loading items:', error);
-            Alert.alert('Error', error.message || 'Failed to load items');
-        }
+        };
+        fetchItems();
     }, [username]);
+    
 
     useFocusEffect(fetchData);
 
@@ -40,7 +37,7 @@ const HomeScreen = ({ route }) => {
     const handleDeleteItem = async (upc) => {
         try {
             console.log(`Attempting to delete item with UPC: ${upc} for user: ${username}`);
-
+            
             // Make an API call to the server to remove the item
             const response = await fetch(apiBaseUrl + '/removeItem', {
                 method: 'POST',
@@ -70,7 +67,6 @@ const HomeScreen = ({ route }) => {
         }
     };
 
-
     const handleBarcodeScanned = (data) => {
         handleAddItem(data);
     };
@@ -95,26 +91,33 @@ const HomeScreen = ({ route }) => {
                 data={products}
                 keyExtractor={(item, index) => index.toString()}
                 renderItem={({ item }) => (
-                    <View style={styles.itemContainer}>
-                        <Image
-                            source={{ uri: item.image }}
-                            style={styles.image}
-                            resizeMode="contain"
-                        />
-                        <View style={styles.textContainer}>
-                            <Text style={styles.descriptionText}>{item.description}</Text>
-                            <Text style={styles.brandText}>Brand: {item.brand}</Text>
-                            <Text style={styles.priceText}>Price: ${item.price}</Text>
-                            <Text style={styles.locationText}>In Stock At: {item.locationName}</Text>
-                            <Text style={styles.addressText}>Address: {item.address}</Text>
-                            <Text style={styles.aisleText}>Aisle: {item.aisle}</Text>
-                        </View>
+                <View style={styles.itemContainer}>
+                    <Image
+                        source={{ uri: item.image }}
+                        style={styles.image}
+                        resizeMode="contain"
+                    />
+                    <View style={styles.textContainer}>
+                        <Text style={styles.descriptionText}>{item.description}</Text>
+                        <Text style={styles.brandText}>Brand: {item.brand}</Text>
+                        {item.inStock ? (
+                            <>
+                                <Text style={styles.priceText}>Price: ${item.price}</Text>
+                                <Text style={styles.locationText}>In Stock At: {item.locationName}</Text>
+                                <Text style={styles.addressText}>Address: {item.address}</Text>
+                                <Text style={styles.aisleText}>Aisle: {item.aisle}</Text>
+                            </>
+                        ) : (
+                            <Text style={styles.outOfStockText}>Out of Stock!</Text>
+                        )}
+                    </View>
                         <TouchableOpacity onPress={() => handleDeleteItem(item.upc)}>
                             <Text style={styles.deleteText}>Delete</Text>
                         </TouchableOpacity>
                     </View>
                 )}
             />
+
 
 
             <View style={styles.buttonContainer}>
@@ -149,9 +152,9 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: 'gray',
         paddingHorizontal: 10,
-        paddingVertical: 8, // Increased padding for taller input box
+        paddingVertical: 8,
         borderRadius: 8,
-        marginRight: 10, // Right margin for spacing between input and button
+        marginRight: 10,
         backgroundColor: '#fff',
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
@@ -162,7 +165,7 @@ const styles = StyleSheet.create({
     searchButton: {
         paddingHorizontal: 20,
         paddingVertical: 8,
-        backgroundColor: '#007AFF', // Default iOS button color
+        backgroundColor: '#007AFF',
         color: '#fff',
         borderRadius: 8,
     },
@@ -200,7 +203,6 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
         elevation: 3,
     },
-    // Additional styles for product details
     image: {
         width: 100,
         height: 100,
